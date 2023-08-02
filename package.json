@@ -4,6 +4,9 @@
     "description": "Jooby NS Tools",
     "author": "",
     "main": "./src/index.js",
+    "repository": {
+        "url": "https://github.com/jooby-dev/ns-tools"
+    },
     "type": "module",
     "exports": {
         "./*": "./src/*"
