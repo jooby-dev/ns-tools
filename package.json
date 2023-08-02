@@ -8,6 +8,9 @@
     "exports": {
         "./*": "./src/*"
     },
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "lint:eslint": "eslint ./src",
         "lint:fix": "npm run lint:eslint -- --fix --max-warnings=0",
