@@ -1,0 +1,39 @@
+name: release
+
+on:
+    # allow to run manually
+    workflow_dispatch:
+        inputs:
+            provenance:
+                description: 'Use npm package provenance'
+                required: true
+                default: 'true'
+                type: choice
+                options:
+                  - 'true'
+                  - 'false'
+
+# allow only one concurrent run
+concurrency: "release"
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+          - uses: actions/checkout@v3
+
+          - uses: actions/setup-node@v3
+            with:
+                node-version: '18.x'
+                cache: npm
+                registry-url: https://registry.npmjs.org
+
+          - run: npm ci
+          - run: npm test
+
+          - run: npm run publish
+            env:
+                NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+                NPM_CONFIG_PROVENANCE: ${{ github.event.inputs.provenance || 'true' }}
+          - run: cat /home/runner/.npm/_logs/*.log

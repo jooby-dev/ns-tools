@@ -17,7 +17,8 @@ module.exports = {
 
     env: {
         es2022: true,
-        node: true
+        node: true,
+        browser: true
     },
 
     parserOptions: {
@@ -87,12 +88,13 @@ module.exports = {
 
         // plugins
         'import/extensions': ['warn', 'ignorePackages'],
-        'import/no-extraneous-dependencies': 'off',
-        'import/prefer-default-export': 'off',
         'import/no-anonymous-default-export': 'off',
-        'import/no-relative-packages': 'off',
+        'import/no-extraneous-dependencies': 'off',
         'import/no-named-as-default-member': 'off',
+        'import/no-relative-packages': 'off',
+        'import/no-unresolved': 'off',
         'import/order': 'off',
+        'import/prefer-default-export': 'off',
 
         'no-param-reassign': 'off',
         'guard-for-in': 'off',

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+SCRIPT_NAME="test"
+
+npm run $SCRIPT_NAME
+
+if [ $? -ne 0 ]; then
+    echo "Error: $SCRIPT_NAME failed, commit aborted."
+    exit 1
+fi
