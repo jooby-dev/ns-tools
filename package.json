@@ -1,0 +1,23 @@
+{
+    "name": "ns-tools",
+    "version": "1.0.0",
+    "description": "Jooby NS Tools",
+    "author": "",
+    "main": "./src/index.js",
+    "type": "module",
+    "exports": {
+        "./*": "./src/*"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "devDependencies": {
+        "eslint": "^8.46.0",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-plugin-import": "^2.28.0"
+    },
+    "peerDependencies": {
+        "jooby-codec": "^2.9.0"
+    },
+    "license": "ISC"
+}
