@@ -131,7 +131,7 @@ const sendMessage = async ( eui, data, {apiUrl, token} ) => {
     downlinkCounters.set(eui, downlinkCounter);
 
     if ( !response.ok ) {
-        throw new Error('Failed to get device info.');
+        throw new Error('Failed to send message to device.');
     }
 
     return response.json();
@@ -147,11 +147,32 @@ export default class ChirpStackServer extends Server {
         this.devices = {};
     }
 
+    #mapDevice ( device, {application, tenant} ) {
+        device.id = device.devEui;
+
+        if ( !application ) {
+            const cachedDevice = this.devices[device.id];
+
+            if ( cachedDevice ) {
+                application = cachedDevice.application;
+                tenant = cachedDevice.tenant;
+            }
+        }
+
+        this.devices[device.id] = device;
+        device.application = application;
+        device.tenant = tenant;
+
+        return device;
+    }
+
     /**
      * Get the given device info.
      */
     async getDevice ( eui ) {
-        return getDevice(eui, this.config);
+        const device = await getDevice(eui, this.config);
+
+        return this.#mapDevice(device);
     }
 
     /**
@@ -173,10 +194,7 @@ export default class ChirpStackServer extends Server {
 
                 for ( const device of devices ) {
                     device.application = application;
-                    device.eui = device.devEui;
-
-                    delete device.devEui;
-                    this.devices[device.eui] = device;
+                    this.#mapDevice(device, {application, tenant});
                 }
             }
         }
