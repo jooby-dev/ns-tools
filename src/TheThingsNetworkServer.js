@@ -7,6 +7,7 @@ import {HIGHEST} from './constants/ttn/schedulePriorityTypes.js';
 
 
 const NS_RELAY_NAMESPACE = 'ttn';
+const DEVICE_EUI_PROPERTY_NAME = 'dev_eui';
 
 const defaultHeaders = {
     Accept: 'application/json',
@@ -112,6 +113,10 @@ export default class TheThingsNetworkServer extends Server {
         super(config);
 
         this.devices = {};
+    }
+
+    static getDeviceEui ( device ) {
+        return device.ids[DEVICE_EUI_PROPERTY_NAME];
     }
 
     /**

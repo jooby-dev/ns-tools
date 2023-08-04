@@ -6,4 +6,8 @@ export default class Server {
     getDevices () {
         throw new Error('Method not implemented');
     }
+
+    static getDeviceEui () {
+        throw new Error('Method not implemented');
+    }
 }
