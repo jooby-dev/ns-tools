@@ -14,17 +14,20 @@ const defaultHeaders = {
     'Content-Type': 'application/json'
 };
 
+const getHeaders = token => ({
+    ...defaultHeaders,
+    'Grpc-Metadata-Authorization': `Bearer ${token}`
+});
+
 
 const getTenants = async ( {apiUrl, token} ) => {
-    const url = new URL(`tenants?limit=${RESULT_LIMIT}`, apiUrl);
-    const options = {
-        method: 'GET',
-        headers: {
-            ...defaultHeaders,
-            'Grpc-Metadata-Authorization': `Bearer ${token}`
+    const response = await fetch(
+        new URL(`tenants?limit=${RESULT_LIMIT}`, apiUrl),
+        {
+            method: 'GET',
+            headers: getHeaders(token)
         }
-    };
-    const response = await fetch(url.href, options);
+    );
 
     if ( !response.ok ) {
         throw new Error('Failed to get user tenants.');
@@ -35,15 +38,13 @@ const getTenants = async ( {apiUrl, token} ) => {
 
 
 const getApplications = async ( tenantId, {apiUrl, token} ) => {
-    const url = new URL(`applications?limit=${RESULT_LIMIT}&tenantId=${tenantId}`, apiUrl);
-    const options = {
-        method: 'GET',
-        headers: {
-            ...defaultHeaders,
-            'Grpc-Metadata-Authorization': `Bearer ${token}`
+    const response = await fetch(
+        new URL(`applications?limit=${RESULT_LIMIT}&tenantId=${tenantId}`, apiUrl),
+        {
+            method: 'GET',
+            headers: getHeaders(token)
         }
-    };
-    const response = await fetch(url.href, options);
+    );
 
     if ( !response.ok ) {
         throw new Error('Failed to get tenant applications.');
@@ -54,15 +55,13 @@ const getApplications = async ( tenantId, {apiUrl, token} ) => {
 
 
 const getDevices = async ( applicationId, {apiUrl, token} ) => {
-    const url = new URL(`${apiUrl}devices?limit=${RESULT_LIMIT}&applicationId=${applicationId}`, apiUrl);
-    const options = {
-        method: 'GET',
-        headers: {
-            ...defaultHeaders,
-            'Grpc-Metadata-Authorization': `Bearer ${token}`
+    const response = await fetch(
+        new URL(`devices?limit=${RESULT_LIMIT}&applicationId=${applicationId}`, apiUrl),
+        {
+            method: 'GET',
+            headers: getHeaders(token)
         }
-    };
-    const response = await fetch(url.href, options);
+    );
 
     if ( !response.ok ) {
         throw new Error('Failed to get application devices.');
@@ -73,15 +72,13 @@ const getDevices = async ( applicationId, {apiUrl, token} ) => {
 
 
 const getDevice = async ( eui, {apiUrl, token} ) => {
-    const url = new URL(`devices/${eui}`, apiUrl);
-    const options = {
-        method: 'GET',
-        headers: {
-            ...defaultHeaders,
-            'Grpc-Metadata-Authorization': `Bearer ${token}`
+    const response = await fetch(
+        new URL(`devices/${eui}`, apiUrl),
+        {
+            method: 'GET',
+            headers: getHeaders(token)
         }
-    };
-    const response = await fetch(url.href, options);
+    );
 
     if ( !response.ok ) {
         throw new Error('Failed to get device info.');
@@ -92,15 +89,16 @@ const getDevice = async ( eui, {apiUrl, token} ) => {
 
 
 const sendData = async ( eui, data, {nsRelayUrl} ) => {
-    const url = new URL(`/chirpstack/${eui}/messages`, nsRelayUrl);
-    const options = {
-        method: 'POST',
-        headers: {
-            ...defaultHeaders
-        },
-        body: JSON.stringify({data})
-    };
-    const response = await fetch(url.href, options);
+    const response = await fetch(
+        new URL(`/chirpstack/${eui}/messages`, nsRelayUrl),
+        {
+            method: 'POST',
+            headers: {
+                ...defaultHeaders
+            },
+            body: JSON.stringify({data})
+        }
+    );
 
     if ( !response.ok ) {
         throw new Error('Failed to send device payload.');
@@ -110,14 +108,10 @@ const sendData = async ( eui, data, {nsRelayUrl} ) => {
 };
 
 const sendMessage = async ( eui, data, {apiUrl, token} ) => {
-    const url = new URL(`devices/${eui}/queue`, apiUrl);
     let downlinkCounter = downlinkCounters.get(eui) || 1000;
     const options = {
         method: 'POST',
-        headers: {
-            ...defaultHeaders,
-            'Grpc-Metadata-Authorization': `Bearer ${token}`
-        },
+        headers: getHeaders(token),
         body: JSON.stringify({
             queueItem: {
                 data,
@@ -126,7 +120,7 @@ const sendMessage = async ( eui, data, {apiUrl, token} ) => {
             }
         })
     };
-    const response = await fetch(url.href, options);
+    const response = await fetch(new URL(`devices/${eui}/queue`, apiUrl), options);
 
     downlinkCounters.set(eui, downlinkCounter);
 
@@ -149,19 +143,11 @@ export default class ChirpStackServer extends Server {
 
     #mapDevice ( device, {application, tenant} ) {
         device.id = device.devEui;
-
-        if ( !application ) {
-            const cachedDevice = this.devices[device.id];
-
-            if ( cachedDevice ) {
-                application = cachedDevice.application;
-                tenant = cachedDevice.tenant;
-            }
-        }
+        const cachedDevice = this.devices[device.id];
 
         this.devices[device.id] = device;
-        device.application = application;
-        device.tenant = tenant;
+        device.application = cachedDevice.application || application;
+        device.tenant = cachedDevice.tenant || tenant;
 
         return device;
     }
@@ -193,7 +179,6 @@ export default class ChirpStackServer extends Server {
                 this.applications[application.id] = application;
 
                 for ( const device of devices ) {
-                    device.application = application;
                     this.#mapDevice(device, {application, tenant});
                 }
             }

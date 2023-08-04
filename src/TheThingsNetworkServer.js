@@ -14,16 +14,13 @@ const defaultHeaders = {
 };
 
 const getHeaders = token => ({
-    method: 'GET',
-    headers: {
-        ...defaultHeaders,
-        Authorization: `Bearer ${token}`
-    }
+    ...defaultHeaders,
+    Authorization: `Bearer ${token}`
 });
 
 const getDevice = async ( deviceId, {apiUrl, token, appId} ) => {
     const response = await fetch(
-        new URL(`${apiUrl}/applications/${appId}/devices/${deviceId}`),
+        new URL(`applications/${appId}/devices/${deviceId}`, apiUrl),
         {
             method: 'GET',
             headers: getHeaders(token)
@@ -39,7 +36,7 @@ const getDevice = async ( deviceId, {apiUrl, token, appId} ) => {
 
 const getDevices = async ( {apiUrl, token, appId} ) => {
     const response = await fetch(
-        new URL(`${apiUrl}/applications/${appId}/devices`),
+        new URL(`applications/${appId}/devices`, apiUrl),
         {
             method: 'GET',
             headers: getHeaders(token)
@@ -92,7 +89,10 @@ const sendMessage = async ( deviceId, data, {apiUrl, token, appId} ) => {
             }]
         })
     };
-    const response = await fetch(new URL(`${apiUrl}/as/applications/${appId}/devices/${deviceId}/down/push`), options);
+    const response = await fetch(
+        new URL(`as/applications/${appId}/devices/${deviceId}/down/push`, apiUrl),
+        options
+    );
 
     if ( !response.ok ) {
         throw new Error('Failed to send message to device.');
@@ -105,7 +105,7 @@ const sendMessage = async ( deviceId, data, {apiUrl, token, appId} ) => {
 export default class TheThingsNetworkServer extends Server {
     constructor ( config ) {
         if ( !config.appId ) {
-            // extract appId if it empty, maybe will be  deleted after discuss
+            // extract appId if it empty, maybe delete after discuss
             config.appId = config.appUrl.split('/').pop();
         }
 
@@ -115,7 +115,6 @@ export default class TheThingsNetworkServer extends Server {
     }
 
     /**
-     *
      * @example
      * ```
      * this.#mapDevice({
