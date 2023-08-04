@@ -5,6 +5,7 @@ import getBase64FromBytes from 'jooby-codec/utils/getBase64FromBytes.js';
 
 
 const RESULT_LIMIT = 100;
+const DEVICE_EUI_PROPERTY_NAME = 'devEui';
 
 // unique id for each device for sendMessage
 const downlinkCounters = new Map();
@@ -141,8 +142,12 @@ export default class ChirpStackServer extends Server {
         this.devices = {};
     }
 
+    static getDeviceEui ( device ) {
+        return device[DEVICE_EUI_PROPERTY_NAME];
+    }
+
     #mapDevice ( device, {application, tenant} ) {
-        device.id = device.devEui;
+        device.id = device[DEVICE_EUI_PROPERTY_NAME];
         const cachedDevice = this.devices[device.id];
 
         this.devices[device.id] = device;
