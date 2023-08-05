@@ -151,8 +151,8 @@ export default class ChirpStackServer extends Server {
         const cachedDevice = this.devices[device.id];
 
         this.devices[device.id] = device;
-        device.application = cachedDevice.application || application;
-        device.tenant = cachedDevice.tenant || tenant;
+        device.application = application || cachedDevice?.application;
+        device.tenant = tenant || cachedDevice?.tenant;
 
         return device;
     }
