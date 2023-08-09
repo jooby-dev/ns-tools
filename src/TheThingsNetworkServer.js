@@ -190,7 +190,9 @@ export default class TheThingsNetworkServer extends Server {
         eventSource.onmessage = event => {
             const payload = JSON.parse(event.data);
 
-            payload.data = getBytesFromHex(payload.data);
+            if ( payload.data ) {
+                payload.data = getBytesFromHex(payload.data);
+            }
 
             callback(payload);
         };
