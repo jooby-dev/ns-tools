@@ -5,6 +5,7 @@ import getBase64FromBytes from 'jooby-codec/utils/getBase64FromBytes.js';
 
 
 const RESULT_LIMIT = 100;
+const NS_RELAY_NAMESPACE = 'chirpstack';
 const DEVICE_EUI_PROPERTY_NAME = 'devEui';
 
 // unique id for each device for sendMessage
@@ -91,7 +92,7 @@ const getDevice = async ( eui, {apiUrl, token} ) => {
 
 const sendData = async ( eui, data, {nsRelayUrl} ) => {
     const response = await fetch(
-        new URL(`/chirpstack/${eui}/messages`, nsRelayUrl),
+        new URL(`/${NS_RELAY_NAMESPACE}/${eui}/messages`, nsRelayUrl),
         {
             method: 'POST',
             headers: {
@@ -212,7 +213,7 @@ export default class ChirpStackServer extends Server {
 
     addListener ( euiList, callback ) {
         const euiString = euiList.join();
-        const url = new URL(`/chirpstack/sse?eui=${euiString}`, this.config.nsRelayUrl);
+        const url = new URL(`/${NS_RELAY_NAMESPACE}/sse?eui=${euiString}`, this.config.nsRelayUrl);
         const eventSource = new EventSource(url.href);
 
         eventSource.onmessage = event => {
