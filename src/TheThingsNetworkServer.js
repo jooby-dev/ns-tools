@@ -51,42 +51,15 @@ const getDevices = async ( {apiUrl, token, appId} ) => {
     return (await response.json()).end_devices;
 };
 
-
-const sendData = async ( deviceId, data, {nsRelayUrl} ) => {
-    const response = await fetch(
-        new URL(`/${NS_RELAY_NAMESPACE}/${deviceId}/messages`, nsRelayUrl),
-        {
-            method: 'POST',
-            headers: {
-                ...defaultHeaders
-            },
-            body: JSON.stringify({data})
-        }
-    );
-
-    if ( !response.ok ) {
-        throw new Error('Failed to send device payload.');
-    }
-
-    return response.json();
-};
-
 const sendMessage = async ( deviceId, data, {apiUrl, token, appId} ) => {
     const options = {
         method: 'POST',
         headers: getHeaders(token),
         body: JSON.stringify({
             downlinks: [{
-                // session_key_id: '',
                 f_port: 1,
-                // f_cnt: 0,
                 frm_payload: data,
-                // decoded_payload: {},
-                // decoded_payload_warnings: [],
-                // confirmed: false,
-                // class_b_c: {},
                 priority: HIGHEST
-                // correlation_ids: []
             }]
         })
     };
@@ -175,9 +148,6 @@ export default class TheThingsNetworkServer extends Server {
      */
     async sendMessage ( deviceId, data ) {
         const base64 = getBase64FromBytes(data);
-
-        // send to ns-relay
-        await sendData(deviceId, base64, this.config);
 
         // send to TTN
         return sendMessage(deviceId, base64, this.config);

@@ -146,9 +146,10 @@ export default class ChirpStackServer extends Server {
         return device[DEVICE_EUI_PROPERTY_NAME];
     }
 
-    #mapDevice ( device, {application, tenant} ) {
+    #mapDevice ( device, options = {} ) {
         device.id = device[DEVICE_EUI_PROPERTY_NAME];
         const cachedDevice = this.devices[device.id];
+        const {application, tenant} = options;
 
         this.devices[device.id] = device;
         device.application = application || cachedDevice?.application;
