@@ -1,0 +1,29 @@
+name: mirror to GitLab
+
+on:
+    push:
+    workflow_dispatch:
+
+jobs:
+    mirror:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
+
+            - name: push to GitLab mirror
+              env:
+                  GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+              run: |
+                  # set up git configuration
+                  git config --global user.name "github-actions-bot"
+                  git config --global user.email "github-actions-bot-@users.noreply.github.com"
+
+                  # construct the target url with token auth
+                  TARGET_URL="https://oauth2:${GITLAB_TOKEN}@gitlab.com/infomir-jooby-dev/ns-tools.git"
+
+                  # push all branches and tags
+                  git push --prune "$TARGET_URL" "+refs/remotes/origin/*:refs/heads/*"
+                  git push --tags --prune "$TARGET_URL"
